@@ -1,1 +1,1 @@
-# 2D-n-body-simulation
+This is the prototype of a naive implementation of a 2D n-body system
