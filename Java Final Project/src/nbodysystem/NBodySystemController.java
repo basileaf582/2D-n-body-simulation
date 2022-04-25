@@ -106,13 +106,18 @@ public class NBodySystemController {
 	
 	@FXML
 	public void makeBodies(MouseEvent event) {
-		Body b = new Body(event.getX(), event.getY(), 0, 10, 10); //last num changes with scale, implement later!
-		bodies.add(b);
+		System.out.println(background.returnListSize());
+		Body b = new Body(event.getX(), event.getY(), 0, 0, 10); //last num changes with scale, implement later!
+		System.out.println(background.returnListSize());
+	//	bodies.add(b);
+		System.out.println(background.returnListSize());
 		background.addtoList(b);
+		System.out.println(background.returnListSize());
 		BodyView g = new BodyView(b);
 		bodiesview.add(g);
 		pane.getChildren().add(g);
 		System.out.println(b.getX() + " " + b.getY());
+		System.out.println(background.returnListSize());
 		updateViews();
 	}
 	
