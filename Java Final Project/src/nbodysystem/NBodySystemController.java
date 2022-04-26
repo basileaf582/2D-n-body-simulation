@@ -7,15 +7,21 @@ import nbodysystem.BodyView;
 import javafx.animation.AnimationTimer;
 import javafx.event.Event;
 import javafx.fxml.FXML;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 
 public class NBodySystemController {
 	
 	@FXML
 	private Pane pane;
+	
+	@FXML
+	private Canvas canvas;
 	
 	@FXML
 	private Button start;
@@ -29,12 +35,13 @@ public class NBodySystemController {
 	private ArrayList<Body> bodies;
 	private ArrayList<BodyView> bodiesview;
 	private NBodyBackground background;
+	private GraphicsContext context;
 
 	private Movement clock;
 	
 	private class Movement extends AnimationTimer {
 
-		private long FRAMES_PER_SEC = 25L;
+		private long FRAMES_PER_SEC = 50L;
 		private long INTERVAL = 1000000000L / FRAMES_PER_SEC;
 
 		private long last = 0;
@@ -62,9 +69,10 @@ public class NBodySystemController {
 	
 	@FXML
 	public void initialize() {
+		context = canvas.getGraphicsContext2D();
 		bodies = new ArrayList<Body>();
 		bodiesview = new ArrayList<BodyView>();
-		background = new NBodyBackground(bodies, 1);
+		background = new NBodyBackground(bodies, 0.1);
 		clock = new Movement();
 		clock.setBodies(bodies);
 		clock.setBackground(background);
@@ -73,6 +81,7 @@ public class NBodySystemController {
 		//stop.setOnAction(event -> stop());
 		//reset.setOnAction(event -> reset());
 		//resume.setOnAction(event -> resume());
+		
 		
 		
 	}
@@ -95,6 +104,7 @@ public class NBodySystemController {
 		}
 		bodies.clear();
 		bodiesview.clear();
+		context.clearRect(0, 0, canvas.getWidth(), canvas.getHeight()); //https://stackoverflow.com/questions/27203671/javafx-how-to-clear-the-canvas
 		start.setText("Start");
 	}
 	
@@ -106,24 +116,21 @@ public class NBodySystemController {
 	
 	@FXML
 	public void makeBodies(MouseEvent event) {
-		System.out.println(background.returnListSize());
-		Body b = new Body(event.getX(), event.getY(), 0, 0, 10); //last num changes with scale, implement later!
-		System.out.println(background.returnListSize());
-	//	bodies.add(b);
-		System.out.println(background.returnListSize());
-		background.addtoList(b);
-		System.out.println(background.returnListSize());
-		BodyView g = new BodyView(b);
-		bodiesview.add(g);
-		pane.getChildren().add(g);
-		System.out.println(b.getX() + " " + b.getY());
-		System.out.println(background.returnListSize());
+		int r = (int) (Math.random()*255);
+		int g = (int) (Math.random()*255);
+		int b = (int) (Math.random()*255);
+		Body n = new Body(event.getX(), event.getY(), 0, 0, 5, Color.rgb(r, g, b)); //last num changes with scale, implement later!
+		System.out.println(n.toString());
+		background.addtoList(n);
+		BodyView z = new BodyView(n);
+		bodiesview.add(z);
+		pane.getChildren().add(z);
 		updateViews();
 	}
 	
 	public void updateViews() {
 		for (BodyView g : bodiesview) {
-			g.update();
+			g.update(context);
 			//System.out.println(bodies.toString());
 			//System.out.println(bodiesview.toString());
 		}
