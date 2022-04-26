@@ -1,8 +1,8 @@
 package nbodysystem;
 
 import java.util.ArrayList;
-import QuadTree.QuadTree;
-import QuadTree.Region;
+//import QuadTree.QuadTree;
+//import QuadTree.Region;
 
 public class NBodyBackground {
 	
@@ -76,35 +76,93 @@ public class NBodyBackground {
 				yAccelerationNew = 0;
 				xVelocityNew = b.getXVelocity();
 				yVelocityNew = b.getYVelocity();
+				adjustOutofBoundsTest(b);
 				for(Body z : bodyList) {
 					if(z.equals(b)) {
 						continue; //https://stackoverflow.com/questions/11160952/goto-next-iteration-in-for-loop-in-java#:~:text=If%20you%20want%20to%20skip,(another%20question%20about%20label).
 						//z = bodyList.get((bodyList.indexOf(z) + 1) % bodyList.size()); //skips to next neighbor;
 					}
+					else {
 						//xAccelerationNew = (-G*z.getMass())*(((b.getX() - z.getX()))/(Math.pow((Math.abs((b.getX() - z.getX()))),2)));
 						xAccelerationNew = (-G*z.getMass())*(((b.getX() - z.getX()))/(Math.abs(Math.pow(b.getX() - z.getX(), 2) + Math.pow(b.getY() - z.getY(), 2))));
-						System.out.println(xAccelerationNew);
 						yAccelerationNew = (-G*z.getMass())*(((b.getY() - z.getY()))/(Math.abs(Math.pow(b.getX() - z.getX(), 2) + Math.pow(b.getY() - z.getY(), 2))));
-						System.out.println(yAccelerationNew);
-						xVelocityNew = b.getXVelocity() + xAccelerationNew*secperframe;
-						System.out.println(xVelocityNew);
-						yVelocityNew = b.getYVelocity() + yAccelerationNew*secperframe;
-						System.out.println(yVelocityNew);
+						xVelocityNew += xAccelerationNew*secperframe;
+						yVelocityNew += yAccelerationNew*secperframe;
 						b.setXVelocity(xVelocityNew);
 						b.setYVelocity(yVelocityNew);
-						b.setX(b.getX() + b.getXVelocity());
-						b.setY(b.getY() + b.getYVelocity());
-						System.out.println(b.getX() + " " + b.getY());
+						b.setX(b.getX() + xVelocityNew);
+						b.setY(b.getY() + yVelocityNew);
 				}
 			}
 		}
+		}
 		else if(bodyList.size() == 1) {
+			adjustOutofBoundsTest(getBody(0));
 			getBody(0).setX(getBodyX(0) + getBodyXVelocity(0));
-			System.out.println(getBodyXVelocity(0));
+		//	System.out.println(getBodyXVelocity(0));
 			getBody(0).setY(getBodyY(0) + getBodyYVelocity(0));
-			System.out.println(getBodyYVelocity(0));
+		//	System.out.println(getBodyYVelocity(0));
 		}
 	}
+	
+
+	public void adjustOutofBoundsTest(Body b) {
+		if((b.getX() + b.getRadius()) >= 1880 | (b.getX() + b.getRadius()) <= 10) {
+			xVelocityNew = (-1*b.getXVelocity())/1.5;
+			b.setXVelocity(xVelocityNew);
+			b.setX(b.getX() + b.getXVelocity());
+		}
+		if((b.getY() + b.getRadius()) >= 900 | (b.getY() + b.getRadius()) <= 10) {
+			yVelocityNew = (-1*b.getYVelocity())/1.5;
+			b.setYVelocity(yVelocityNew);
+			b.setY(b.getY() + b.getYVelocity());
+		}
+	}
+	
+	/*	public Boolean isXOutOfBounds(Body b) {
+		double overX = Math.max(0, (b.getX() + b.getRadius()) - 1875);
+		overX = Math.max(overX, b.getRadius() - b.getX());
+		if(overX > 0) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	
+	public Boolean isYOutOfBounds(Body b) {
+		double overY = Math.max(0, b.getY() + b.getRadius() - 900);
+		overY = Math.max(overY, b.getRadius() - b.getY());
+		if(overY > 0) {
+			return true;
+		}
+		else {
+			return false;
+		}
+		
+	}
+	
+	public void adjustOutOfBounds(Body b) {
+		if(isXOutOfBounds(b)) {
+			xVelocityNew = (-1*(b.getXVelocity()))/2;
+			//xAccelerationNew = b.getXVelocity();
+			//xVelocityNew = b.getXVelocity() + xAccelerationNew*secperframe;
+			b.setXVelocity(xVelocityNew);
+			b.setX(b.getX() + b.getXVelocity());
+		}
+		if(isYOutOfBounds(b)) {
+			yVelocityNew = (-1*(b.getYVelocity()))/2;
+			//yAccelerationNew = b.getYVelocity();
+			//yVelocityNew = b.getYVelocity() + yAccelerationNew*secperframe;
+			b.setYVelocity(yVelocityNew);
+			b.setY(b.getY() + b.getYVelocity());
+		}
+		
+	}
+	 * 
+	 */
+	
+
 			
 	
 	/*	public void calculateNextPosition() {
