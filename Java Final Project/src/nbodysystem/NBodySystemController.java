@@ -5,8 +5,11 @@ import java.util.ArrayList;
 import nbodysystem.Body;
 import nbodysystem.BodyView;
 import javafx.animation.AnimationTimer;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.Event;
 import javafx.fxml.FXML;
+import javafx.scene.control.Slider;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
@@ -24,6 +27,15 @@ public class NBodySystemController {
 	private Canvas canvas;
 	
 	@FXML
+	private Slider massSlider;
+	
+	@FXML
+	private Slider speedXSlider;
+	
+	@FXML
+	private Slider speedYSlider;
+	
+	@FXML
 	private Button start;
 	
 	@FXML
@@ -36,6 +48,9 @@ public class NBodySystemController {
 	private ArrayList<BodyView> bodiesview;
 	private NBodyBackground background;
 	private GraphicsContext context;
+	private double changeSize;
+	private double changeVSpeed;
+	private double changeHSpeed;
 
 	private Movement clock;
 	
@@ -73,6 +88,27 @@ public class NBodySystemController {
 		bodies = new ArrayList<Body>();
 		bodiesview = new ArrayList<BodyView>();
 		background = new NBodyBackground(bodies, 0.1);
+		massSlider.valueProperty().addListener(new ChangeListener<Number>(){
+			@Override
+			public void changed(ObservableValue<? extends Number> observableValue, Number t1, Number t2) {
+				changeSize = massSlider.getValue();
+			}
+			
+		});
+		speedXSlider.valueProperty().addListener(new ChangeListener<Number>(){
+			@Override
+			public void changed(ObservableValue<? extends Number> observableValue, Number t1, Number t2) {
+				changeVSpeed = speedXSlider.getValue();
+			}
+			
+		});
+		speedYSlider.valueProperty().addListener(new ChangeListener<Number>(){
+			@Override
+			public void changed(ObservableValue<? extends Number> observableValue, Number t1, Number t2) {
+				changeHSpeed = speedYSlider.getValue();
+			}
+			
+		});
 		clock = new Movement();
 		clock.setBodies(bodies);
 		clock.setBackground(background);
@@ -119,7 +155,7 @@ public class NBodySystemController {
 		int r = (int) (Math.random()*255);
 		int g = (int) (Math.random()*255);
 		int b = (int) (Math.random()*255);
-		Body n = new Body(event.getX(), event.getY(), 0, 0, 5, Color.rgb(r, g, b)); //last num changes with scale, implement later!
+		Body n = new Body(event.getX(), event.getY(), changeVSpeed, changeHSpeed, changeSize, Color.rgb(r, g, b)); //last num changes with scale, implement later!
 		System.out.println(n.toString());
 		background.addtoList(n);
 		BodyView z = new BodyView(n);
