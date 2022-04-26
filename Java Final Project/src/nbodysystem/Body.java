@@ -2,6 +2,8 @@ package nbodysystem;
 
 import java.util.List;
 
+import javafx.scene.paint.Color;
+
 public class Body {
 	
 	private double x;
@@ -10,13 +12,15 @@ public class Body {
 	private double xVelocity;
 	private double yVelocity;
 	private double mass;
+	private Color trailcolor;
 	
-	public Body(double x, double y, double xVelocity, double yVelocity, double mass) {
+	public Body(double x, double y, double xVelocity, double yVelocity, double mass, Color trailcolor) {
 		this.x = x;
 		this.y = y;
 		this.xVelocity = xVelocity;
 		this.yVelocity = yVelocity;
 		this.mass = mass;
+		this.trailcolor = trailcolor;
 		radius = mass;
 	}
 	
@@ -41,6 +45,10 @@ public class Body {
 		radius = mass;
 	}
 	
+	public void setTrailColor(Color c) {
+		this.trailcolor = c;
+	}
+	
 	public double getX() {
 		return x;
 	}
@@ -59,6 +67,18 @@ public class Body {
 	
 	public double getMass() {
 		return mass;
+	}
+	
+	public double getRadius() {
+		return radius;
+	}
+	
+	public Color getTrailColor() {
+		return trailcolor;
+	}
+	
+	public String toString() {
+		return "xPos: " + x + " yPos: " + y + " xVelocity: " + xVelocity + " yVelocity: " + yVelocity + " Mass: " + mass;
 	}
 	
 
