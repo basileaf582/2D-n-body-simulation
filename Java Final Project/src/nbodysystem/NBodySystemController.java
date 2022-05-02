@@ -85,8 +85,8 @@ public class NBodySystemController {
 	@FXML
 	public void initialize() {
 		GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
-		int width = gd.getDisplayMode().getWidth() - 20;
-		int height = gd.getDisplayMode().getHeight() - 80;
+		int width = gd.getDisplayMode().getWidth() - 750;
+		int height = gd.getDisplayMode().getHeight() - 550;
 	    borderpane.setMaxSize(width, height);
 		borderpane.setPrefSize(width, height);
 		borderpane.setMinSize(width, height);
