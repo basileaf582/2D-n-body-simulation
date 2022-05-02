@@ -1,26 +1,20 @@
 package nbodysystem;
 
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
-import java.util.ArrayList;
-import java.util.Stack;
 
-import nbodysystem.Body;
-import nbodysystem.BodyView;
+import java.util.Stack;
 import javafx.animation.AnimationTimer;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.control.Slider;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Background;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.stage.Screen;
 
 public class NBodySystemController {
 	
@@ -84,16 +78,15 @@ public class NBodySystemController {
 	
 	@FXML
 	public void initialize() {
-		GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
-		int width = gd.getDisplayMode().getWidth() - 750;
-		int height = gd.getDisplayMode().getHeight() - 550;
+		double width = Screen.getPrimary().getBounds().getWidth();
+		double height = Screen.getPrimary().getBounds().getHeight() - 100; //https://stackoverflow.com/questions/40951184/javafx-screen-getprimary-getbounds-returns-incorrect-screen-size
 	    borderpane.setMaxSize(width, height);
 		borderpane.setPrefSize(width, height);
 		borderpane.setMinSize(width, height);
-		pane.setMaxSize(width, height - 100);
-		pane.setPrefSize(width, height - 100);
-		pane.setMinSize(width, height - 100);
-		canvas.setHeight(height - 100);
+		pane.setMaxSize(width, height - 80);
+		pane.setPrefSize(width, height - 80);
+		pane.setMinSize(width, height - 80);
+		canvas.setHeight(height - 80);
 		canvas.setWidth(width);
 		context = canvas.getGraphicsContext2D();
 		bodies = new Stack<Body>();
