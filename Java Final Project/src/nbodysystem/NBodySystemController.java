@@ -1,6 +1,9 @@
 package nbodysystem;
 
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.util.ArrayList;
+import java.util.Stack;
 
 import nbodysystem.Body;
 import nbodysystem.BodyView;
@@ -15,10 +18,14 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Background;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 
 public class NBodySystemController {
+	
+	@FXML
+	private BorderPane borderpane;
 	
 	@FXML
 	private Pane pane;
@@ -38,14 +45,8 @@ public class NBodySystemController {
 	@FXML
 	private Button start;
 	
-	@FXML
-	private Button stop;
-	
-	@FXML
-	private Button reset;
-
-	private ArrayList<Body> bodies;
-	private ArrayList<BodyView> bodiesview;
+	private Stack<Body> bodies;
+	private Stack<BodyView> bodiesview;
 	private NBodyBackground background;
 	private GraphicsContext context;
 	private double changeSize;
@@ -56,14 +57,14 @@ public class NBodySystemController {
 	
 	private class Movement extends AnimationTimer {
 
-		private long FRAMES_PER_SEC = 50L;
+		private long FRAMES_PER_SEC = 60L;
 		private long INTERVAL = 1000000000L / FRAMES_PER_SEC;
 
 		private long last = 0;
-		private ArrayList<Body> bodies;
+		private Stack<Body> bodies;
 		private NBodyBackground background;
 		
-		public void setBodies(ArrayList<Body> bodies) {
+		public void setBodies(Stack<Body> bodies) {
 			this.bodies = bodies;
 		}
 		
@@ -75,7 +76,6 @@ public class NBodySystemController {
 		public void handle(long now) {
 			if (now - last > INTERVAL) {
 				background.calculateNextPosition();
-			//	background.debugCalculuate(); //works - the problem is with calculateNextPosition;
 				updateViews();
 				last = now;
 			}
@@ -84,10 +84,21 @@ public class NBodySystemController {
 	
 	@FXML
 	public void initialize() {
+		GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+		int width = gd.getDisplayMode().getWidth() - 20;
+		int height = gd.getDisplayMode().getHeight() - 80;
+	    borderpane.setMaxSize(width, height);
+		borderpane.setPrefSize(width, height);
+		borderpane.setMinSize(width, height);
+		pane.setMaxSize(width, height - 100);
+		pane.setPrefSize(width, height - 100);
+		pane.setMinSize(width, height - 100);
+		canvas.setHeight(height - 100);
+		canvas.setWidth(width);
 		context = canvas.getGraphicsContext2D();
-		bodies = new ArrayList<Body>();
-		bodiesview = new ArrayList<BodyView>();
-		background = new NBodyBackground(bodies, 0.1);
+		bodies = new Stack<Body>();
+		bodiesview = new Stack<BodyView>();
+		background = new NBodyBackground(bodies, 0.01666666666, pane.getPrefWidth(), pane.getPrefHeight()); //0.01666666666
 		massSlider.valueProperty().addListener(new ChangeListener<Number>(){
 			@Override
 			public void changed(ObservableValue<? extends Number> observableValue, Number t1, Number t2) {
@@ -98,14 +109,14 @@ public class NBodySystemController {
 		speedXSlider.valueProperty().addListener(new ChangeListener<Number>(){
 			@Override
 			public void changed(ObservableValue<? extends Number> observableValue, Number t1, Number t2) {
-				changeVSpeed = speedXSlider.getValue();
+				changeHSpeed = speedXSlider.getValue();
 			}
 			
 		});
 		speedYSlider.valueProperty().addListener(new ChangeListener<Number>(){
 			@Override
 			public void changed(ObservableValue<? extends Number> observableValue, Number t1, Number t2) {
-				changeHSpeed = speedYSlider.getValue();
+				changeVSpeed = -speedYSlider.getValue();
 			}
 			
 		});
@@ -113,13 +124,6 @@ public class NBodySystemController {
 		clock.setBodies(bodies);
 		clock.setBackground(background);
 		pane.setOnMousePressed(event -> pressed(event));
-		//start.setOnAction(event -> start());
-		//stop.setOnAction(event -> stop());
-		//reset.setOnAction(event -> reset());
-		//resume.setOnAction(event -> resume());
-		
-		
-		
 	}
 	
 	@FXML
@@ -138,10 +142,18 @@ public class NBodySystemController {
 		for(BodyView g: bodiesview) {
 			pane.getChildren().remove(g);
 		}
-		bodies.clear();
+		bodies.clear(); //resets initial palette i.e., prevents "ghost" bodies
 		bodiesview.clear();
 		context.clearRect(0, 0, canvas.getWidth(), canvas.getHeight()); //https://stackoverflow.com/questions/27203671/javafx-how-to-clear-the-canvas
 		start.setText("Start");
+	}
+	
+	@FXML
+	public void removeMostRecent() {
+		background.popFromStack();
+		pane.getChildren().remove(bodiesview.pop());
+		//bodiesview.pop();
+		//updateViews();
 	}
 	
 	@FXML
@@ -155,11 +167,12 @@ public class NBodySystemController {
 		int r = (int) (Math.random()*255);
 		int g = (int) (Math.random()*255);
 		int b = (int) (Math.random()*255);
-		Body n = new Body(event.getX(), event.getY(), changeVSpeed, changeHSpeed, changeSize, Color.rgb(r, g, b)); //last num changes with scale, implement later!
+		Body n = new Body(event.getX(), event.getY(), changeHSpeed, changeVSpeed, changeSize, Color.rgb(r, g, b)); //last num changes with scale, implement later!
 		System.out.println(n.toString());
-		background.addtoList(n);
+		background.pushToStack(n);
 		BodyView z = new BodyView(n);
-		bodiesview.add(z);
+		bodiesview.push(z);
+		//bodiesview.push(z);
 		pane.getChildren().add(z);
 		updateViews();
 	}
