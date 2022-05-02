@@ -23,7 +23,7 @@ public class NBodySystem extends Application {
 			BorderPane root = (BorderPane)FXMLLoader.load(getClass().getResource("NBodySystemGUI.fxml"));
 			Scene scene = new Scene(root);
 			primaryStage.setScene(scene);
-			primaryStage.setMaximized(true);
+			primaryStage.setMaximized(true); //https://stackoverflow.com/questions/6864540/how-to-set-a-javafx-stage-frame-to-maximized
 			primaryStage.show();
 			root.requestFocus();
 		} catch(Exception e) {
