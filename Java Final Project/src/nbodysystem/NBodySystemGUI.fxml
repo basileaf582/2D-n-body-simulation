@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1000.0" prefWidth="1900.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="nbodysystem.NBodySystemController">
+<BorderPane fx:id="borderpane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1000.0" prefWidth="1900.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="nbodysystem.NBodySystemController">
    <center>
       <Pane fx:id="pane" prefHeight="700.0" prefWidth="1900.0" BorderPane.alignment="CENTER">
          <children>
@@ -38,7 +38,7 @@
             </VBox>
             <VBox prefHeight="200.0" prefWidth="100.0">
                <children>
-                  <Button fx:id="stop" mnemonicParsing="false" onAction="#stop" prefHeight="25.0" prefWidth="78.0" text="Stop">
+                  <Button mnemonicParsing="false" onAction="#stop" prefHeight="25.0" prefWidth="78.0" text="Stop">
                      <font>
                         <Font size="14.0" />
                      </font>
@@ -48,7 +48,7 @@
                   </Button>
                </children>
             </VBox>
-            <Button fx:id="reset" mnemonicParsing="false" onAction="#reset" prefHeight="30.0" prefWidth="77.0" text="Reset">
+            <Button mnemonicParsing="false" onAction="#reset" prefHeight="30.0" prefWidth="77.0" text="Reset">
                <font>
                   <Font size="14.0" />
                </font>
@@ -56,9 +56,17 @@
                   <Insets left="20.0" top="30.0" />
                </HBox.margin>
             </Button>
+            <Button mnemonicParsing="false" onAction="#removeMostRecent" prefHeight="33.0" prefWidth="77.0" text="Undo">
+               <HBox.margin>
+                  <Insets left="20.0" top="30.0" />
+               </HBox.margin>
+               <font>
+                  <Font size="14.0" />
+               </font>
+            </Button>
             <VBox prefHeight="100.0" prefWidth="133.0">
                <children>
-                  <Label prefHeight="17.0" prefWidth="130.0" text="New Body: Size">
+                  <Label prefHeight="17.0" prefWidth="130.0" text="New Body: Mass">
                      <font>
                         <Font size="13.0" />
                      </font>
@@ -68,7 +76,7 @@
                   </Label>
                   <HBox prefHeight="80.0" prefWidth="135.0">
                      <children>
-                        <Slider fx:id="massSlider" prefHeight="38.0" prefWidth="130.0" showTickLabels="true" showTickMarks="true">
+                        <Slider fx:id="massSlider" blockIncrement="5.0" majorTickUnit="24.0" min="1.0" prefHeight="38.0" prefWidth="130.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="5.0">
                            <HBox.margin>
                               <Insets top="10.0" />
                            </HBox.margin>
@@ -77,10 +85,10 @@
                   </HBox>
                </children>
                <HBox.margin>
-                  <Insets left="75.0" />
+                  <Insets left="90.0" />
                </HBox.margin>
             </VBox>
-            <VBox prefHeight="100.0" prefWidth="150.0">
+            <VBox prefHeight="100.0" prefWidth="223.0">
                <children>
                   <Label prefHeight="19.0" prefWidth="149.0" text="New Body: Vertical Speed">
                      <VBox.margin>
@@ -92,7 +100,7 @@
                   </Label>
                   <HBox prefHeight="80.0" prefWidth="135.0">
                      <children>
-                        <Slider fx:id="speedXSlider" prefHeight="38.0" prefWidth="130.0" showTickLabels="true" showTickMarks="true">
+                        <Slider fx:id="speedYSlider" min="-100.0" prefHeight="38.0" prefWidth="188.0" showTickLabels="true" showTickMarks="true" snapToTicks="true">
                            <HBox.margin>
                               <Insets top="10.0" />
                            </HBox.margin>
@@ -104,7 +112,7 @@
                   <Insets left="30.0" />
                </HBox.margin>
             </VBox>
-            <VBox prefHeight="100.0" prefWidth="171.0">
+            <VBox prefHeight="100.0" prefWidth="189.0">
                <children>
                   <Label prefHeight="18.0" prefWidth="169.0" text="New Body: Horizontal Speed">
                      <font>
@@ -116,7 +124,7 @@
                   </Label>
                   <HBox prefHeight="75.0" prefWidth="155.0">
                      <children>
-                        <Slider fx:id="speedYSlider" prefHeight="38.0" prefWidth="130.0" showTickLabels="true" showTickMarks="true">
+                        <Slider fx:id="speedXSlider" min="-100.0" prefHeight="38.0" prefWidth="188.0" showTickLabels="true" showTickMarks="true" snapToTicks="true">
                            <HBox.margin>
                               <Insets top="10.0" />
                            </HBox.margin>
