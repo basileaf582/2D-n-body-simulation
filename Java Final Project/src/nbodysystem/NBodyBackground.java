@@ -1,6 +1,7 @@
 package nbodysystem;
 
 import java.util.ArrayList;
+import java.util.Stack;
 //import QuadTree.QuadTree;
 //import QuadTree.Region;
 
@@ -22,101 +23,203 @@ public class NBodyBackground {
 	 * 
 	 */
 	
-	private ArrayList<Body> bodyList;
+	private Stack<Body> bodyStack;
+	private double screenWidth;
+	private double screenHeight;
 	private double xAccelerationNew;
 	private double yAccelerationNew;
 	private double xVelocityNew;
 	private double yVelocityNew;
 	private double secperframe;
+	private boolean isTouching;
 	private final double G = (6.6743*(10^11));
 	
-	public NBodyBackground(ArrayList<Body> bodyList, double secperframe) {
-		this.bodyList = bodyList;
+	public NBodyBackground(Stack<Body> bodyStack, double secperframe, double screenWidth, double screenHeight) {
+		this.bodyStack = bodyStack;
 		this.secperframe = secperframe;
+		this.screenWidth = screenWidth;
+		this.screenHeight = screenHeight;
 	}
 	
 	private Body getBody(int spot) {
-		return bodyList.get(spot);
+		return bodyStack.get(spot);
 	}
 	
 	private double getBodyX(int spot) {
-		return bodyList.get(spot).getX();
+		return bodyStack.get(spot).getX();
 	}
 	
 	private double getBodyY(int spot) {
-		return bodyList.get(spot).getY();
+		return bodyStack.get(spot).getY();
 	}
 	
 	private double getBodyMass(int spot) {
-		return bodyList.get(spot).getMass();
+		return bodyStack.get(spot).getMass();
 	}
 	
 	private double getBodyXVelocity(int spot) {
-		return bodyList.get(spot).getXVelocity();
+		return bodyStack.get(spot).getXVelocity();
 	}
 	
 	private double getBodyYVelocity(int spot) {
-		return bodyList.get(spot).getYVelocity();
+		return bodyStack.get(spot).getYVelocity();
 	}
 	
-	public void addtoList(Body body) {
-		bodyList.add(body);
+	private double distanceBetween(Body b1, Body b2) {
+		return Math.sqrt(Math.pow(Math.abs(b1.getX()) - b2.getX(), 2) + Math.pow(Math.abs(b1.getY() - b2.getY()), 2));
+		//return Math.abs(Math.pow(b1.getX() - b2.getX(),2) + Math.pow(b1.getY() - b2.getY(), 2));
+	}
+	
+	public Boolean isTouching(Body b1, Body b2) {
+		if(distanceBetween(b1,b2) <= (b1.getRadius() + b2.getRadius())) {
+			isTouching = true;
+		}
+		else {
+			isTouching = false;
+		}
+		return isTouching;
+	}
+	
+	public void registerCollision(Body b1, Body b2) {  //https://gamedev.stackexchange.com/questions/20516/ball-collisions-sticking-together/20525#20525 experimental
+		double xDistance = Math.abs(b1.getX() - b2.getX());
+		double yDistance = Math.abs(b1.getY() - b2.getY());
+        double dotProduct = xDistance*(b2.getXVelocity() - b1.getXVelocity()) + yDistance*(b2.getYVelocity() - b1.getYVelocity());
+        if(dotProduct > 0){
+            double collisionScale = dotProduct / distanceBetween(b1,b2);
+            double xCollision = xDistance * collisionScale;
+            double yCollision = yDistance * collisionScale;
+            double combinedMass = b1.getMass() + b2.getMass();
+            double collisionWeightB1 = 2 * b2.getMass() / combinedMass;
+            double collisionWeightB2 = 2 * b1.getMass() / combinedMass;
+            b1.setXVelocity(b1.getXVelocity() + (collisionWeightB1 * xCollision));
+            b1.setYVelocity(b1.getYVelocity() + (collisionWeightB1 * yCollision));
+            b2.setXVelocity(b2.getXVelocity() + (collisionWeightB2 * xCollision));
+            b2.setYVelocity(b2.getYVelocity() + (collisionWeightB2 * yCollision));
+            b1.setX(b1.getX() + b1.getXVelocity());
+            b1.setY(b1.getY() + b1.getYVelocity());
+            b2.setX(b2.getX() - b2.getXVelocity());
+            b2.setY(b2.getY() - b2.getYVelocity());
+            
+        }
+    }
+	/*xVelocityNew = ((b1.getMass() - b2.getMass())/(b1.getMass() + b2.getMass()))*b1.getXVelocity() + ((2*b2.getMass())/(b1.getMass() + b2.getMass()))*b2.getXVelocity();
+		yVelocityNew = ((b1.getMass() - b2.getMass())/(b1.getMass() + b2.getMass()))*b1.getYVelocity() + ((2*b2.getMass())/(b1.getMass() + b2.getMass()))*b2.getYVelocity(); //derived from the conservation of momentum and kinetic energy principles;
+		//xVelocityNew = (-1*b1.getXVelocity());
+		//yVelocityNew = (-1*b1.getYVelocity());
+		b1.setXVelocity(xVelocityNew);
+		b1.setYVelocity(yVelocityNew);
+		b1.setX(b1.getX() + xVelocityNew);
+		b1.setY(b1.getY() + yVelocityNew);
+		
+		xVelocityNew = ((b2.getMass() - b1.getMass())/(b1.getMass() + b2.getMass()))*b2.getXVelocity() + ((2*b1.getMass())/(b1.getMass() + b2.getMass()))*b1.getXVelocity();
+		yVelocityNew = ((b2.getMass() - b1.getMass())/(b1.getMass() + b2.getMass()))*b2.getYVelocity() + ((2*b1.getMass())/(b1.getMass() + b2.getMass()))*b1.getYVelocity(); //derived from the conservation of momentum and kinetic energy principles;
+	//	xVelocityNew = (-1*b2.getXVelocity());
+	//	yVelocityNew = (-1*b2.getXVelocity());
+		b2.setXVelocity(xVelocityNew);
+		b2.setYVelocity(yVelocityNew);
+		b2.setX(b2.getX() + xVelocityNew);
+		b2.setY(b2.getY() + yVelocityNew);
+	 * 
+	 */
+	
+	public void pushToStack(Body body) {
+		bodyStack.push(body);
+		//bodyStack.add(body);
 		//System.out.println(bodyList.toString());
 		
 	}
 	
-	public int returnListSize() {
-		return bodyList.size();
+	public void popFromStack() {
+		if(bodyStack.size() > 0) {
+			bodyStack.pop();
+		}
+	}
+	
+	public int returnStackSize() {
+		return bodyStack.size();
 	}
 	
 	public void calculateNextPosition() {
-		if(bodyList.size() > 1) {
-			for(Body b : bodyList) {
+		if(bodyStack.size() > 1) {
+			for(Body b : bodyStack) {
 				xAccelerationNew = 0;
 				yAccelerationNew = 0;
 				xVelocityNew = b.getXVelocity();
 				yVelocityNew = b.getYVelocity();
-				adjustOutofBoundsTest(b);
-				for(Body z : bodyList) {
+				OutofBoundsTest(b);
+				for(Body z : bodyStack) {
 					if(z.equals(b)) {
 						continue; //https://stackoverflow.com/questions/11160952/goto-next-iteration-in-for-loop-in-java#:~:text=If%20you%20want%20to%20skip,(another%20question%20about%20label).
-						//z = bodyList.get((bodyList.indexOf(z) + 1) % bodyList.size()); //skips to next neighbor;
+					}
+					else if(isTouching(b,z)) {
+						//registerCollision(b,z); still buggy, fix later
+						b.setX(b.getX() + b.getXVelocity());
+						b.setY(b.getY() + b.getYVelocity());
+					//	z.setX(z.getX() + z.getXVelocity());
+					//	z.setY(z.getY() + z.getYVelocity());
+
+					//	continue;
 					}
 					else {
-						//xAccelerationNew = (-G*z.getMass())*(((b.getX() - z.getX()))/(Math.pow((Math.abs((b.getX() - z.getX()))),2)));
-						xAccelerationNew = (-G*z.getMass())*(((b.getX() - z.getX()))/(Math.abs(Math.pow(b.getX() - z.getX(), 2) + Math.pow(b.getY() - z.getY(), 2))));
-						yAccelerationNew = (-G*z.getMass())*(((b.getY() - z.getY()))/(Math.abs(Math.pow(b.getX() - z.getX(), 2) + Math.pow(b.getY() - z.getY(), 2))));
+						xAccelerationNew += (-G*z.getMass())*(((b.getX() - z.getX()))/Math.pow(distanceBetween(b,z), 2));
+						yAccelerationNew += (-G*z.getMass())*(((b.getY() - z.getY()))/Math.pow(distanceBetween(b,z), 2));
 						xVelocityNew += xAccelerationNew*secperframe;
 						yVelocityNew += yAccelerationNew*secperframe;
 						b.setXVelocity(xVelocityNew);
 						b.setYVelocity(yVelocityNew);
-						b.setX(b.getX() + xVelocityNew);
-						b.setY(b.getY() + yVelocityNew);
+						b.setX(b.getX() + b.getXVelocity());
+						b.setY(b.getY() + b.getYVelocity());
 				}
 			}
 		}
 		}
-		else if(bodyList.size() == 1) {
-			adjustOutofBoundsTest(getBody(0));
+		else if(bodyStack.size() == 1) {
+			OutofBoundsTest(getBody(0));
 			getBody(0).setX(getBodyX(0) + getBodyXVelocity(0));
-		//	System.out.println(getBodyXVelocity(0));
 			getBody(0).setY(getBodyY(0) + getBodyYVelocity(0));
-		//	System.out.println(getBodyYVelocity(0));
 		}
 	}
 	
 
-	public void adjustOutofBoundsTest(Body b) {
-		if((b.getX() + b.getRadius()) >= 1880 | (b.getX() + b.getRadius()) <= 10) {
-			xVelocityNew = (-1*b.getXVelocity())/1.5;
-			b.setXVelocity(xVelocityNew);
+	public void OutofBoundsTest(Body b) {
+		if((b.getX() + b.getRadius()) >= screenWidth | (b.getX() - b.getRadius()) <= 10) {
+			reflectX(b);
 			b.setX(b.getX() + b.getXVelocity());
 		}
-		if((b.getY() + b.getRadius()) >= 900 | (b.getY() + b.getRadius()) <= 10) {
-			yVelocityNew = (-1*b.getYVelocity())/1.5;
-			b.setYVelocity(yVelocityNew);
+		if((b.getY() + b.getRadius()) >= screenHeight | (b.getY() - b.getRadius()) <= 10) {
+			reflectY(b);
 			b.setY(b.getY() + b.getYVelocity());
 		}
+		
+	
+	}
+	
+	/*	public void OutofBoundsTest(Body b) { //unleashes the physics demons
+		double overX = Math.max(0, (b.getX() + b.getRadius() - 1900));
+		overX = Math.max(overX, (b.getX() - b.getRadius() + 1900));
+		if(overX > 0) {
+			reflectX(b);
+			b.setX(b.getX() + Math.signum(b.getXVelocity())*overX);
+			
+		}
+		double overY = Math.max(0, (b.getY() + b.getRadius() - 700));
+		overY = Math.max(overY, (b.getY() - b.getRadius() + 700));
+		if(overY > 0) {
+			reflectY(b);
+			b.setY(b.getY() + Math.signum(b.getYVelocity())*overY);
+		}
+	 * 
+	 */
+	
+	public void reflectX(Body b) {
+		xVelocityNew = (-1*b.getXVelocity())/1.2;
+		b.setXVelocity(xVelocityNew);
+		
+	}
+	
+	public void reflectY(Body b) {
+		yVelocityNew = (-1*b.getYVelocity())/1.2;
+		b.setYVelocity(yVelocityNew);
 	}
 	
 	/*	public Boolean isXOutOfBounds(Body b) {
@@ -200,13 +303,6 @@ public class NBodyBackground {
 	}
 	 * 
 	 */
-	
-	public void debugCalculuate() {
-		for(Body b : bodyList) {
-			b.setX(b.getX() + 0.5);
-		}
-	}
-	
 	/*		for(int i = 0; i < bodyList.size(); i++) {
 			System.out.println(getBodyX(i) + " " + getBodyY(i));
 			xAccelerationNew = 0;
