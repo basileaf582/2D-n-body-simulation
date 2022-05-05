@@ -10,6 +10,7 @@ import javafx.scene.control.Slider;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
@@ -28,6 +29,9 @@ public class NBodySystemController {
 	private Canvas canvas;
 	
 	@FXML
+	private Slider sizeSlider;
+	
+	@FXML
 	private Slider massSlider;
 	
 	@FXML
@@ -37,6 +41,12 @@ public class NBodySystemController {
 	private Slider speedYSlider;
 	
 	@FXML
+	private CheckBox enableBodyCollision;
+	
+	@FXML
+	private CheckBox enableWallCollision;
+	
+	@FXML
 	private Button start;
 	
 	private Stack<Body> bodies;
@@ -44,14 +54,16 @@ public class NBodySystemController {
 	private NBodyBackground background;
 	private GraphicsContext context;
 	private double changeSize;
+	private double changeMass;
 	private double changeVSpeed;
 	private double changeHSpeed;
+	private final double secsperframe = 0.00714285714; //reciprocal of frames per second
 
 	private Movement clock;
 	
 	private class Movement extends AnimationTimer {
 
-		private long FRAMES_PER_SEC = 60L;
+		private long FRAMES_PER_SEC = 140L;
 		private long INTERVAL = 1000000000L / FRAMES_PER_SEC;
 
 		private long last = 0;
@@ -77,25 +89,32 @@ public class NBodySystemController {
 	}
 	
 	@FXML
-	public void initialize() {
+	public void initialize() {//adjusts screen resolution for each machine and initializes slider objects, the canvas object, stacks of type body and bodyview, the background object, and the clock object
 		double width = Screen.getPrimary().getBounds().getWidth();
 		double height = Screen.getPrimary().getBounds().getHeight() - 100; //https://stackoverflow.com/questions/40951184/javafx-screen-getprimary-getbounds-returns-incorrect-screen-size
 	    borderpane.setMaxSize(width, height);
 		borderpane.setPrefSize(width, height);
 		borderpane.setMinSize(width, height);
-		pane.setMaxSize(width, height - 80);
-		pane.setPrefSize(width, height - 80);
-		pane.setMinSize(width, height - 80);
-		canvas.setHeight(height - 80);
+		pane.setMaxSize(width, height - 60); //adjusted for optimal viewing
+		pane.setPrefSize(width, height - 60);
+		pane.setMinSize(width, height - 60);
+		canvas.setHeight(height - 60);
 		canvas.setWidth(width);
 		context = canvas.getGraphicsContext2D();
 		bodies = new Stack<Body>();
 		bodiesview = new Stack<BodyView>();
-		background = new NBodyBackground(bodies, 0.01666666666, pane.getPrefWidth(), pane.getPrefHeight()); //0.01666666666
+		background = new NBodyBackground(bodies, secsperframe, pane.getPrefWidth(), pane.getPrefHeight(), false, false); //0.01666666666, 
 		massSlider.valueProperty().addListener(new ChangeListener<Number>(){
 			@Override
 			public void changed(ObservableValue<? extends Number> observableValue, Number t1, Number t2) {
-				changeSize = massSlider.getValue();
+				changeMass = massSlider.getValue();
+			}
+			
+		});
+		sizeSlider.valueProperty().addListener(new ChangeListener<Number>(){
+			@Override
+			public void changed(ObservableValue<? extends Number> observableValue, Number t1, Number t2) {
+				changeSize = sizeSlider.getValue();
 			}
 			
 		});
@@ -113,10 +132,13 @@ public class NBodySystemController {
 			}
 			
 		});
+		changeMass = 7; //default mass and size of each ball
+		changeSize = 7;
 		clock = new Movement();
 		clock.setBodies(bodies);
 		clock.setBackground(background);
-		pane.setOnMousePressed(event -> pressed(event));
+		pane.setOnMousePressed(event -> pressed(event)); //maps the pane to the makeBody method via the pressed method
+		
 	}
 	
 	@FXML
@@ -135,46 +157,49 @@ public class NBodySystemController {
 		for(BodyView g: bodiesview) {
 			pane.getChildren().remove(g);
 		}
-		bodies.clear(); //resets initial palette i.e., prevents "ghost" bodies
+		bodies.clear(); //resets initial body pool i.e., prevents "ghost" bodies
 		bodiesview.clear();
 		context.clearRect(0, 0, canvas.getWidth(), canvas.getHeight()); //https://stackoverflow.com/questions/27203671/javafx-how-to-clear-the-canvas
 		start.setText("Start");
 	}
 	
 	@FXML
-	public void removeMostRecent() {
+	public void checkBodyBox() {
+		background.toggleBodyCollision();
+	}
+	
+	@FXML
+	public void checkWallBox() {
+		background.toggleWallCollision();
+	}
+	
+	@FXML
+	public void removeMostRecent() {//interacts with body stack in background class (different from body stack in controller class if more bodies are added or removed after the simulation starts)
 		background.popFromStack();
 		pane.getChildren().remove(bodiesview.pop());
-		//bodiesview.pop();
-		//updateViews();
 	}
 	
 	@FXML
 	public void pressed(MouseEvent event){
 		makeBodies(event);
-		//event.consume();
 	}
 	
 	@FXML
-	public void makeBodies(MouseEvent event) {
+	public void makeBodies(MouseEvent event) {//assigns each body a random colored trail and designated mass, radius, and velocities
 		int r = (int) (Math.random()*255);
 		int g = (int) (Math.random()*255);
 		int b = (int) (Math.random()*255);
-		Body n = new Body(event.getX(), event.getY(), changeHSpeed, changeVSpeed, changeSize, Color.rgb(r, g, b)); //last num changes with scale, implement later!
-		System.out.println(n.toString());
+		Body n = new Body(event.getX(), event.getY(), changeHSpeed, changeVSpeed, changeMass, changeSize, Color.rgb(r, g, b)); 
 		background.pushToStack(n);
 		BodyView z = new BodyView(n);
 		bodiesview.push(z);
-		//bodiesview.push(z);
 		pane.getChildren().add(z);
 		updateViews();
 	}
 	
-	public void updateViews() {
+	public void updateViews() {//responsible for updating the GUI per frame
 		for (BodyView g : bodiesview) {
 			g.update(context);
-			//System.out.println(bodies.toString());
-			//System.out.println(bodiesview.toString());
 		}
 	}
 }
