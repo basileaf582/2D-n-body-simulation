@@ -96,8 +96,6 @@ public class NBodyBackground {
 							reflectX(b);
 							reflectY(b);
 						}
-						b.setX(b.getX() + b.getXVelocity()); 
-						b.setY(b.getY() + b.getYVelocity());
 					}
 					else {//calculates the net gravitational acceleration of the body b and multiplies it with the secperframe variable assigned by the controller class
 						xAccelerationNew += (-G*z.getMass())*(((b.getX() - z.getX()))/Math.pow(distanceBetween(b,z), 2));
@@ -106,16 +104,17 @@ public class NBodyBackground {
 						yVelocityNew += yAccelerationNew*secperframe;
 						b.setXVelocity(xVelocityNew);
 						b.setYVelocity(yVelocityNew);
-						b.setX(b.getX() + b.getXVelocity());
-						b.setY(b.getY() + b.getYVelocity());
-						if(canCollideWithWall) {//testing after forces have been calculated prevents bodies becoming stuck to the wall.
-							OutofBoundsCollisionTest(b);
-						}
-						else {
-							OutofBoundsLoopTest(b);
-						}
+						
 				}
 			}
+				b.setX(b.getX() + b.getXVelocity());
+				b.setY(b.getY() + b.getYVelocity());
+				if(canCollideWithWall) {//testing after forces have been calculated prevents bodies becoming stuck to the wall.
+					OutofBoundsCollisionTest(b);
+				}
+				else {
+					OutofBoundsLoopTest(b);
+				}
 		}
 		}
 		else if(bodyStack.size() == 1) { 
