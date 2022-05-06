@@ -125,7 +125,7 @@
                   </Label>
                   <HBox prefHeight="80.0" prefWidth="135.0">
                      <children>
-                        <Slider fx:id="speedYSlider" min="-100.0" prefHeight="38.0" prefWidth="188.0" showTickLabels="true" showTickMarks="true" snapToTicks="true">
+                        <Slider fx:id="speedYSlider" majorTickUnit="10.0" max="50.0" min="-50.0" minorTickCount="5" prefHeight="38.0" prefWidth="210.0" showTickLabels="true" showTickMarks="true" snapToTicks="true">
                            <HBox.margin>
                               <Insets top="10.0" />
                            </HBox.margin>
@@ -134,10 +134,10 @@
                   </HBox>
                </children>
                <HBox.margin>
-                  <Insets left="30.0" />
+                  <Insets left="20.0" />
                </HBox.margin>
             </VBox>
-            <VBox prefHeight="100.0" prefWidth="189.0">
+            <VBox prefHeight="100.0" prefWidth="198.0">
                <children>
                   <Label prefHeight="18.0" prefWidth="169.0" text="New Body: Horizontal Speed">
                      <font>
@@ -149,7 +149,7 @@
                   </Label>
                   <HBox prefHeight="75.0" prefWidth="155.0">
                      <children>
-                        <Slider fx:id="speedXSlider" min="-100.0" prefHeight="38.0" prefWidth="188.0" showTickLabels="true" showTickMarks="true" snapToTicks="true">
+                        <Slider fx:id="speedXSlider" majorTickUnit="10.0" max="50.0" min="-50.0" minorTickCount="5" prefHeight="38.0" prefWidth="210.0" showTickLabels="true" showTickMarks="true" snapToTicks="true">
                            <HBox.margin>
                               <Insets top="10.0" />
                            </HBox.margin>
